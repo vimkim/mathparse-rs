@@ -3,3 +3,9 @@ _default:
 
 test:
     cargo test
+
+check:
+    cargo check
+
+check-clip:
+    cargo check |& clip
