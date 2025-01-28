@@ -1,7 +1,7 @@
 use crate::token::Token;
 use anyhow::Result;
 
-fn tokenize(expr: &str) -> Result<Vec<Token>> {
+pub fn tokenize(expr: &str) -> Result<Vec<Token>> {
     let mut tokens = Vec::new();
     let mut chars = expr.chars().peekable();
 
@@ -33,6 +33,27 @@ fn tokenize(expr: &str) -> Result<Vec<Token>> {
             ')' => {
                 tokens.push(Token::RParen);
                 chars.next();
+            }
+            '0'..='9' | '.' => {
+                let mut num_str = String::new();
+
+                while let Some(&c) = chars.peek() {
+                    if c.is_numeric() || c == '.' {
+                        num_str.push(c);
+                        chars.next();
+                    } else {
+                        break;
+                    }
+                }
+
+                match num_str.parse::<f64>() {
+                    Ok(num) => {
+                        tokens.push(Token::Number(num));
+                    }
+                    Err(_) => {
+                        return Err(anyhow::anyhow!("invalid number: {}", num_str));
+                    }
+                }
             }
             _ => {
                 return Err(anyhow::anyhow!("unexpected character: {}", ch));
